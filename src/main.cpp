@@ -1,18 +1,21 @@
 #include <Arduino.h>
+#include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char *ssid =	"TP-LINK_BF33";		// cannot be longer than 32 characters!
-const char *pass =	"82447410";		//
+const char *ssid =	"talli";		// cannot be longer than 32 characters!
+const char *pass =	"kopo2008";		//
 IPAddress server(192, 168, 0, 3);
 long lastMsg = 0;
 //char msg[50];
+int fanvalue=40;
 int value = 0;
 float t;
 float h;
 float p;
 Adafruit_BME280 bme1;
+Adafruit_BME280 bme2;
 WiFiClient wclient;
 PubSubClient client(wclient);
 struct linedata
@@ -79,6 +82,7 @@ Serial.begin(9600);
 delay(100);
  Serial.println();
   Serial.println();
+
 setup_wifi();
   client.setServer(server, 1883);
   client.setCallback(callback);
@@ -86,9 +90,14 @@ Wire.setClockStretchLimit(2000);
  Wire.begin(D1, D2);
   Wire.setClock(100000);
  pinMode(D3,OUTPUT);
- if (!bme1.begin(0x76, &Wire)) {
+ analogWrite(D3,fanvalue);
+   if (!bme1.begin(0x76, &Wire)) {
         Serial.println("Could not find a valid BME280 sensor, check wiring!");
-        while (1); 
+        while (1);
+    }
+     if (!bme2.begin(0x77, &Wire)){
+        Serial.println("Could not find a valid BME280 sensor, check wiring!");
+        while (1);
     }
 
 }
@@ -101,34 +110,57 @@ void loop() {
   float hud1 = bme1.readHumidity();
   // float pressure = 0;
   float h = hud1/100;
+ float hud2 = bme2.readHumidity();
+  float h2 = hud2/100;
 
 
  float temp1 = bme1.readTemperature();
     float t= temp1+273.15;
+    float temp2 = bme2.readTemperature();
+    float t2= temp2+273.15;
 
  p = bme1.readPressure();
- float hum=(1320.65/t)*h*pow(10,(7.4475*(t-273.14)/(t-39.44)));
-  
+  float p2 = bme2.readPressure();
+ float abshum=(1320.65/t)*h*pow(10,(7.4475*(t-273.14)/(t-39.44)));
+   float abshum2=(1320.65/t2)*h2*pow(10,(7.4475*(t2-273.14)/(t2-39.44)));
   String tempstring = String(temp1);
   String hudstring = String(hud1);
  String pressstring = String(p);
+ String abshumidstring= String(abshum);
+
+  String tempstring2 = String(temp2);
+  String hudstring2 = String(hud2);
+ String pressstring2 = String(p2);
+ String abshumidstring2= String(abshum2);
  
 
   Serial.println(hum);
   Serial.println(t);
   Serial.println(p); 
+  Serial.println(fanvalue);
   linedata linedatatemp;
   linedata linedatahumid;
   linedata linedatapressure;
+  linedata linedataabshumid;
+
+   linedata linedatatemp2;
+  linedata linedatahumid2;
+  linedata linedatapressure2;
+  linedata linedataabshumid2;
 
  delay(1000);
  long now = millis();
   if (now - lastMsg > 2000) {
     lastMsg = now;
-    ++value;
+    
      char tempchar[100];
      char hudchar[100];
        char presschar[100];
+       char abshumchar[100];
+         char tempchar2[100];
+     char hudchar2[100];
+       char presschar2[100];
+       char abshumchar2[100];
     linedatatemp.measurement="intemp";
      linedatatemp.tag="temperature";
     linedatatemp.field=tempstring;
@@ -138,18 +170,63 @@ void loop() {
     linedatapressure.measurement="inpressure";
     linedatapressure.tag="pressure";
     linedatapressure.field=pressstring;
+    linedataabshumid.measurement="Absolute_Humidity_Inside";
+    linedataabshumid.tag="Absolute_Humidity";
+    linedataabshumid.field=abshumidstring;
+
+     linedatatemp2.measurement="outtemp";
+     linedatatemp2.tag="temperature";
+    linedatatemp2.field=tempstring2;
+    linedatahumid2.measurement="outhumid";
+    linedatahumid2.tag="Humidity";
+    linedatahumid2.field=hudstring2;
+    linedatapressure2.measurement="outpressure";
+    linedatapressure2.tag="pressure";
+    linedatapressure2.field=pressstring2;
+    linedataabshumid2.measurement="Absolute_Humidity_Outside";
+    linedataabshumid2.tag="Absolute_Humidity";
+    linedataabshumid2.field=abshumidstring2;
+    
     String tempmsg=linedatatemp.measurement+",type="+ linedatatemp.tag+" value="+linedatatemp.field;
     String humidmsg=linedatahumid.measurement+",type="+ linedatahumid.tag+" value="+linedatahumid.field;
     String pressmsg=linedatapressure.measurement+",type="+ linedatapressure.tag+" value="+linedatapressure.field;
+    String abshummsg=linedataabshumid.measurement+",type="+ linedataabshumid.tag+" value="+linedataabshumid.field;
+
+     String tempmsg2=linedatatemp2.measurement+",type="+ linedatatemp2.tag+" value="+linedatatemp2.field;
+    String humidmsg2=linedatahumid2.measurement+",type="+ linedatahumid2.tag+" value="+linedatahumid2.field;
+    String pressmsg2=linedatapressure2.measurement+",type="+ linedatapressure2.tag+" value="+linedatapressure2.field;
+    String abshummsg2=linedataabshumid2.measurement+",type="+ linedataabshumid2.tag+" value="+linedataabshumid2.field;
    // snprintf (msg, 50, temperature, value);
     tempmsg.toCharArray(tempchar,100);
      humidmsg.toCharArray(hudchar,100);
      pressmsg.toCharArray(presschar,100);
-  
+  abshummsg.toCharArray(abshumchar,100);
+
+   tempmsg2.toCharArray(tempchar2,100);
+     humidmsg2.toCharArray(hudchar2,100);
+     pressmsg2.toCharArray(presschar2,100);
+  abshummsg2.toCharArray(abshumchar2,100);
   
     client.publish("heppatalli/temp/in", tempchar);
     client.publish("heppatalli/humidity/in", hudchar);
     client.publish("heppatalli/pressure/in", presschar);
+     client.publish("heppatalli/abshumid/in", abshumchar);
+
+      client.publish("heppatalli/temp/out", tempchar2);
+    client.publish("heppatalli/humidity/out", hudchar2);
+    client.publish("heppatalli/pressure/out", presschar2);
+     client.publish("heppatalli/abshumid/out", abshumchar2);
   }
+  if ((abshum-abshum2>1)&&(fanvalue<1023))
+{
+fanvalue++;
+analogWrite(D3, fanvalue);
+
+}
+else if  ((abshum-abshum2<1.5)&&(fanvalue>40))
+{
+  fanvalue--;
+  analogWrite(D3, fanvalue);
+}
   // put your main code here, to run repeatedly:
 }
