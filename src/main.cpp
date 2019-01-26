@@ -82,6 +82,7 @@ delay(100);
 setup_wifi();
   client.setServer(server, 1883);
   client.setCallback(callback);
+Wire.setClockStretchLimit(2000);
  Wire.begin(D1, D2);
   Wire.setClock(100000);
  pinMode(D3,OUTPUT);
@@ -112,6 +113,7 @@ void loop() {
   String hudstring = String(hud1);
  String pressstring = String(p);
  
+
   Serial.println(hum);
   Serial.println(t);
   Serial.println(p); 
