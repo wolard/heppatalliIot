@@ -1,0 +1,6 @@
+{
+    "terminal.integrated.env.windows": {
+        "PATH": "C:\\Users\\wolard\\.platformio\\penv\\Scripts;C:\\Users\\wolard\\.platformio\\penv;C:\\ProgramData\\DockerDesktop\\version-bin;C:\\Program Files\\Docker\\Docker\\Resources\\bin;C:\\Python27\\;C:\\Python27\\Scripts;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Windows\\System32\\OpenSSH\\;C:\\Program Files\\PuTTY\\;C:\\Program Files\\Git\\cmd;C:\\Users\\wolard\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\wolard\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Python27;;C:\\ProgramData\\DockerDesktop\\version-bin;C:\\Program Files\\Docker\\Docker\\Resources\\bin;C:\\Python27\\;C:\\Python27\\Scripts;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Windows\\System32\\OpenSSH\\;C:\\Program Files\\PuTTY\\;C:\\Program Files\\Git\\cmd;C:\\Users\\wolard\\AppData\\Local\\Microsoft\\WindowsApps;C:\\Users\\wolard\\AppData\\Local\\Programs\\Microsoft VS Code\\bin;C:\\Python27;",
+        "PLATFORMIO_CALLER": "vscode"
+    }
+}
