@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
@@ -106,18 +107,20 @@ void loop() {
     float t= temp1+273.15;
 
  p = bme1.readPressure();
- float hum=(1320.65/t)*h*pow(10,(7.4475*(t-273.14)/(t-39.44)));
+ float abshum=(1320.65/t)*h*pow(10,(7.4475*(t-273.14)/(t-39.44)));
   
   String tempstring = String(temp1);
   String hudstring = String(hud1);
  String pressstring = String(p);
+ String abshumidstring= String(abshum);
  
-  Serial.println(hum);
+  //Serial.println(hum);
   Serial.println(t);
   Serial.println(p); 
   linedata linedatatemp;
   linedata linedatahumid;
   linedata linedatapressure;
+  linedata linedataabshumid;
 
  delay(1000);
  long now = millis();
@@ -127,6 +130,7 @@ void loop() {
      char tempchar[100];
      char hudchar[100];
        char presschar[100];
+       char abshumchar[100];
     linedatatemp.measurement="intemp";
      linedatatemp.tag="temperature";
     linedatatemp.field=tempstring;
@@ -136,18 +140,24 @@ void loop() {
     linedatapressure.measurement="inpressure";
     linedatapressure.tag="pressure";
     linedatapressure.field=pressstring;
+    linedataabshumid.measurement="Absolute Humidity Inside";
+    linedataabshumid.tag="Absolute Humidity";
+    linedataabshumid.field=abshumidstring;
+    
     String tempmsg=linedatatemp.measurement+",type="+ linedatatemp.tag+" value="+linedatatemp.field;
     String humidmsg=linedatahumid.measurement+",type="+ linedatahumid.tag+" value="+linedatahumid.field;
     String pressmsg=linedatapressure.measurement+",type="+ linedatapressure.tag+" value="+linedatapressure.field;
+    String abshummsg=linedataabshumid.measurement+",type="+ linedataabshumid.tag+" value="+linedataabshumid.field;
    // snprintf (msg, 50, temperature, value);
     tempmsg.toCharArray(tempchar,100);
      humidmsg.toCharArray(hudchar,100);
      pressmsg.toCharArray(presschar,100);
-  
+  abshummsg.toCharArray(abshumchar,100);
   
     client.publish("heppatalli/temp/in", tempchar);
     client.publish("heppatalli/humidity/in", hudchar);
     client.publish("heppatalli/pressure/in", presschar);
+     client.publish("heppatalli/abshumid/in", presschar);
   }
   // put your main code here, to run repeatedly:
 }
