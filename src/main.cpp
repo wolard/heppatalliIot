@@ -4,8 +4,8 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char *ssid =	"talli";		// cannot be longer than 32 characters!
-const char *pass =	"kopo2008";		//
+const char *ssid =	"TP-LINK_BF33";		// cannot be longer than 32 characters!
+const char *pass =	"82447410";		//
 IPAddress server(192, 168, 0, 3);
 long lastMsg = 0;
 //char msg[50];
@@ -86,7 +86,7 @@ delay(100);
 setup_wifi();
   client.setServer(server, 1883);
   client.setCallback(callback);
-Wire.setClockStretchLimit(2000);
+//Wire.setClockStretchLimit(2000);
  Wire.begin(D1, D2);
   Wire.setClock(100000);
  pinMode(D3,OUTPUT);
@@ -134,7 +134,7 @@ void loop() {
  String abshumidstring2= String(abshum2);
  
 
-  Serial.println(hum);
+  //Serial.println(hum);
   Serial.println(t);
   Serial.println(p); 
   Serial.println(fanvalue);
