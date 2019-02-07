@@ -4,12 +4,12 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char *ssid =	"ota";		// cannot be longer than 32 characters!
+const char *ssid =	"talli";		// cannot be longer than 32 characters!
 const char *pass =	"kopo2008";		//
 WiFiEventHandler gotIpEventHandler, disconnectedEventHandler;
 
 
-IPAddress server(192, 168, 43, 19);
+IPAddress server(192, 168, 0, 3);
 long lastMsg = 0;
 //char msg[50];
 int fanvalue=40;
@@ -19,8 +19,8 @@ float h;
 float p;
 long i;
 long lastReconnectAttempt = 0;
-//Adafruit_BME280 bme1;
-//Adafruit_BME280 bme2;
+Adafruit_BME280 bme1;
+Adafruit_BME280 bme2;
 WiFiClient wclient;
 PubSubClient client(wclient);
 struct linedata
@@ -131,7 +131,14 @@ delay(100);
   Wire.setClock(100000);
  pinMode(D3,OUTPUT);
  analogWrite(D3,fanvalue);
-   
+    if (!bme1.begin(0x76, &Wire)) {
+        Serial.println("Could not find a valid BME280 sensor, check wiring!");
+        while (1);
+    }
+     if (!bme2.begin(0x77, &Wire)){
+        Serial.println("Could not find a valid BME280 sensor, check wiring!");
+        while (1);
+    }
 
 }
 
@@ -154,20 +161,20 @@ void loop() {
 i++;
 Serial.println(i);
 
-  float hud1 = 80;
+ float hud1 = bme1.readHumidity();
   // float pressure = 0;
   float h = hud1/100;
- float hud2 = 60;
+ float hud2 = bme2.readHumidity();
   float h2 = hud2/100;
 
 
- float temp1 = 5;
+ float temp1 = bme1.readTemperature();
     float t= temp1+273.15;
-    float temp2 = 0;
+    float temp2 = bme2.readTemperature();
     float t2= temp2+273.15;
 
- p = 102000;
-  float p2 = 101000;
+ p = bme1.readPressure();
+  float p2 = bme2.readPressure();
  float abshum=(1320.65/t)*h*pow(10,(7.4475*(t-273.14)/(t-39.44)));
    float abshum2=(1320.65/t2)*h2*pow(10,(7.4475*(t2-273.14)/(t2-39.44)));
   String tempstring = String(temp1);
