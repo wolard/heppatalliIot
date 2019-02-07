@@ -4,9 +4,12 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char *ssid =	"TP-LINK_BF33";		// cannot be longer than 32 characters!
-const char *pass =	"82447410";		//
-IPAddress server(192, 168, 0, 3);
+const char *ssid =	"ota";		// cannot be longer than 32 characters!
+const char *pass =	"kopo2008";		//
+WiFiEventHandler gotIpEventHandler, disconnectedEventHandler;
+
+
+IPAddress server(192, 168, 43, 19);
 long lastMsg = 0;
 //char msg[50];
 int fanvalue=40;
@@ -14,6 +17,8 @@ int value = 0;
 float t;
 float h;
 float p;
+long i;
+long lastReconnectAttempt = 0;
 //Adafruit_BME280 bme1;
 //Adafruit_BME280 bme2;
 WiFiClient wclient;
@@ -25,10 +30,18 @@ struct linedata
     String field;
 };
 
+boolean reconnect() {
+  if (client.connect("arduinoClient")) {
+    // Once connected, publish an announcement...
+    client.publish("outTopic","hello world");
+    // ... and resubscribe
+    client.subscribe("inTopic");
+  }
+  return client.connected();
+}
 
 
-
-void reconnect() {
+void reconnect2() {
   // Loop until we're reconnected
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
@@ -78,12 +91,39 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void setup() {
+
+
+  gotIpEventHandler = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP& event)
+  {
+    Serial.print("Station connected, IP: ");
+    Serial.println(WiFi.localIP());
+  });
+
+
+   disconnectedEventHandler = WiFi.onStationModeDisconnected([](const WiFiEventStationModeDisconnected& event)
+  {
+    Serial.println("Station disconnected");
+  });
 Serial.begin(9600);
 delay(100);
+ lastReconnectAttempt = 0;
  Serial.println();
   Serial.println();
+ gotIpEventHandler = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP& event)
+  {
+    Serial.print("Station connected, IP: ");
+    Serial.println(WiFi.localIP());
+  });
 
-setup_wifi();
+  disconnectedEventHandler = WiFi.onStationModeDisconnected([](const WiFiEventStationModeDisconnected& event)
+  {
+    Serial.println("Station disconnected");
+  });
+
+  Serial.printf("Connecting to %s ...\n", ssid);
+  WiFi.begin(ssid, pass);
+
+//setup_wifi();
   client.setServer(server, 1883);
   client.setCallback(callback);
 //Wire.setClockStretchLimit(2000);
@@ -97,19 +137,33 @@ setup_wifi();
 
 void loop() {
  if (!client.connected()) {
-    reconnect();
+    long now = millis();
+    if (now - lastReconnectAttempt > 5000) {
+      lastReconnectAttempt = now;
+    Serial.println("mqtt connectiong");
+      // Attempt to reconnect
+      if (reconnect()) {
+        lastReconnectAttempt = 0;
+      }
+    }
+  } else {
+    // Client connected
+
+    client.loop();
   }
-  client.loop();
+i++;
+Serial.println(i);
+
   float hud1 = 80;
   // float pressure = 0;
   float h = hud1/100;
- float hud2 = 90;
+ float hud2 = 60;
   float h2 = hud2/100;
 
 
- float temp1 = 10;
+ float temp1 = 5;
     float t= temp1+273.15;
-    float temp2 = 15;
+    float temp2 = 0;
     float t2= temp2+273.15;
 
  p = 102000;
@@ -199,7 +253,8 @@ void loop() {
      humidmsg2.toCharArray(hudchar2,100);
      pressmsg2.toCharArray(presschar2,100);
   abshummsg2.toCharArray(abshumchar2,100);
-  
+  if ((WiFi.status() == WL_CONNECTED)&&(client.connected()));
+  {
     client.publish("heppatalli/temp/in", tempchar);
     client.publish("heppatalli/humidity/in", hudchar);
     client.publish("heppatalli/pressure/in", presschar);
@@ -209,15 +264,22 @@ void loop() {
     client.publish("heppatalli/humidity/out", hudchar2);
     client.publish("heppatalli/pressure/out", presschar2);
      client.publish("heppatalli/abshumid/out", abshumchar2);
+ 
+  }
+ 
+ 
   }
   if ((abshum-abshum2>1)&&(fanvalue<1023))
 {
+Serial.println("fan++");
 fanvalue++;
 analogWrite(D3, fanvalue);
+
 
 }
 else if  ((abshum-abshum2<1.5)&&(fanvalue>40))
 {
+ Serial.println("fan++");
   fanvalue--;
   analogWrite(D3, fanvalue);
 }
