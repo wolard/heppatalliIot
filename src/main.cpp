@@ -14,8 +14,8 @@ int value = 0;
 float t;
 float h;
 float p;
-Adafruit_BME280 bme1;
-Adafruit_BME280 bme2;
+//Adafruit_BME280 bme1;
+//Adafruit_BME280 bme2;
 WiFiClient wclient;
 PubSubClient client(wclient);
 struct linedata
@@ -91,14 +91,7 @@ setup_wifi();
   Wire.setClock(100000);
  pinMode(D3,OUTPUT);
  analogWrite(D3,fanvalue);
-   if (!bme1.begin(0x76, &Wire)) {
-        Serial.println("Could not find a valid BME280 sensor, check wiring!");
-        while (1);
-    }
-     if (!bme2.begin(0x77, &Wire)){
-        Serial.println("Could not find a valid BME280 sensor, check wiring!");
-        while (1);
-    }
+   
 
 }
 
@@ -107,20 +100,20 @@ void loop() {
     reconnect();
   }
   client.loop();
-  float hud1 = bme1.readHumidity();
+  float hud1 = 80;
   // float pressure = 0;
   float h = hud1/100;
- float hud2 = bme2.readHumidity();
+ float hud2 = 90;
   float h2 = hud2/100;
 
 
- float temp1 = bme1.readTemperature();
+ float temp1 = 10;
     float t= temp1+273.15;
-    float temp2 = bme2.readTemperature();
+    float temp2 = 15;
     float t2= temp2+273.15;
 
- p = bme1.readPressure();
-  float p2 = bme2.readPressure();
+ p = 102000;
+  float p2 = 101000;
  float abshum=(1320.65/t)*h*pow(10,(7.4475*(t-273.14)/(t-39.44)));
    float abshum2=(1320.65/t2)*h2*pow(10,(7.4475*(t2-273.14)/(t2-39.44)));
   String tempstring = String(temp1);
