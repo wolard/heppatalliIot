@@ -23,6 +23,7 @@ Adafruit_BME280 bme1;
 Adafruit_BME280 bme2;
 WiFiClient wclient;
 PubSubClient client(wclient);
+
 struct linedata
 {
     String measurement;
@@ -109,17 +110,7 @@ delay(100);
  lastReconnectAttempt = 0;
  Serial.println();
   Serial.println();
- gotIpEventHandler = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP& event)
-  {
-    Serial.print("Station connected, IP: ");
-    Serial.println(WiFi.localIP());
-  });
-
-  disconnectedEventHandler = WiFi.onStationModeDisconnected([](const WiFiEventStationModeDisconnected& event)
-  {
-    Serial.println("Station disconnected");
-  });
-
+ 
   Serial.printf("Connecting to %s ...\n", ssid);
   WiFi.begin(ssid, pass);
 
