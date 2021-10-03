@@ -3,13 +3,14 @@
 #include <Adafruit_BME280.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <ESP8266Ping.h>
 
-const char *ssid =	"talli";		// cannot be longer than 32 characters!
+const char *ssid =	"ZyXEL";		// cannot be longer than 32 characters!
 const char *pass =	"kopo2008";		//
 WiFiEventHandler gotIpEventHandler, disconnectedEventHandler;
 
 
-IPAddress server(192, 168, 0, 3);
+IPAddress server(192, 168, 1, 201);
 long lastMsg = 0;
 //char msg[50];
 int fanvalue=40;
@@ -251,8 +252,7 @@ Serial.println(i);
      humidmsg2.toCharArray(hudchar2,100);
      pressmsg2.toCharArray(presschar2,100);
   abshummsg2.toCharArray(abshumchar2,100);
-  if ((WiFi.status() == WL_CONNECTED)&&(client.connected()));
-  {
+ 
     client.publish("heppatalli/temp/in", tempchar);
     client.publish("heppatalli/humidity/in", hudchar);
     client.publish("heppatalli/pressure/in", presschar);
@@ -263,7 +263,7 @@ Serial.println(i);
     client.publish("heppatalli/pressure/out", presschar2);
      client.publish("heppatalli/abshumid/out", abshumchar2);
  
-  }
+  
  
  
   }
@@ -281,5 +281,16 @@ else if  ((abshum-abshum2<1.5)&&(fanvalue>40))
   fanvalue--;
   analogWrite(D3, fanvalue);
 }
+  if (millis() - lastMsg > 5000)
+  {
+    lastMsg = millis();
+      if(Ping.ping(server,1)) {
+    Serial.println("Success!!");
+  } else {
+    Serial.println("Error :(");
+     ESP.restart();
+  }
+
+  }
   // put your main code here, to run repeatedly:
 }
