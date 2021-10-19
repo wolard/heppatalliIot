@@ -169,6 +169,8 @@ Serial.println(i);
   float p2 = bme2.readPressure();
  float abshum=(1320.65/t)*h*pow(10,(7.4475*(t-273.14)/(t-39.44)));
    float abshum2=(1320.65/t2)*h2*pow(10,(7.4475*(t2-273.14)/(t2-39.44)));
+     Serial.print("abshub ");
+    Serial.println(abshum-abshum2);
   String tempstring = String(temp1);
   String hudstring = String(hud1);
  String pressstring = String(p);
@@ -267,17 +269,19 @@ Serial.println(i);
  
  
   }
-  if ((abshum-abshum2>1)&&(fanvalue<1023))
+  if ((abshum-abshum2>1.5)&&(fanvalue<1023)&&(temp2>0))
 {
+
+ 
 Serial.println("fan++");
 fanvalue++;
 analogWrite(D3, fanvalue);
 
 
 }
-else if  ((abshum-abshum2<1.5)&&(fanvalue>40))
+if  (((abshum-abshum2<1.5)&&(fanvalue>5))||(temp2<0))
 {
- Serial.println("fan++");
+ Serial.println("fan--");
   fanvalue--;
   analogWrite(D3, fanvalue);
 }
