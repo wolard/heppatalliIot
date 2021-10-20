@@ -13,7 +13,7 @@ WiFiEventHandler gotIpEventHandler, disconnectedEventHandler;
 IPAddress server(192, 168, 1, 201);
 long lastMsg = 0;
 //char msg[50];
-int fanvalue=40;
+int fanvalue=0;
 int value = 0;
 float t;
 float h;
@@ -269,19 +269,19 @@ Serial.println(i);
  
  
   }
-  if ((abshum-abshum2>1.5)&&(fanvalue<1023)&&(temp2>0))
+  if ((abshum-abshum2<1.5)&&(fanvalue<250)||((temp2<0)&&fanvalue<250))
 {
 
  
-Serial.println("fan++");
+Serial.println("fan slower");
 fanvalue++;
 analogWrite(D3, fanvalue);
 
 
 }
-if  (((abshum-abshum2<1.5)&&(fanvalue>5))||(temp2<0))
+if  (((abshum-abshum2>1.5)&&(fanvalue>=0))&&(temp2>0))
 {
- Serial.println("fan--");
+ Serial.println("fan faster");
   fanvalue--;
   analogWrite(D3, fanvalue);
 }
