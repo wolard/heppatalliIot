@@ -8,7 +8,13 @@
 const char *ssid =	"ZyXEL";		// cannot be longer than 32 characters!
 const char *pass =	"kopo2008";		//
 WiFiEventHandler gotIpEventHandler, disconnectedEventHandler;
+volatile long rpms;
+long rpm;
 
+const byte interruptPin = D4;
+
+long measuretime=0;
+ char rpmhar[5];
 
 IPAddress server(192, 168, 1, 201);
 long lastMsg = 0;
@@ -31,7 +37,11 @@ struct linedata
     String tag;
     String field;
 };
+IRAM_ATTR void blink() {
 
+  rpms++;
+
+}
 boolean reconnect() {
   if (client.connect("arduinoClient")) {
     // Once connected, publish an announcement...
@@ -93,7 +103,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void setup() {
-
+ pinMode(interruptPin, INPUT_PULLUP);
+ attachInterrupt(digitalPinToInterrupt(interruptPin), blink, RISING);
 
   gotIpEventHandler = WiFi.onStationModeGotIP([](const WiFiEventStationModeGotIP& event)
   {
@@ -180,6 +191,7 @@ Serial.println(i);
   String hudstring2 = String(hud2);
  String pressstring2 = String(p2);
  String abshumidstring2= String(abshum2);
+ String rpmstring= String(rpm);
  
 
   //Serial.println(hum);
@@ -201,6 +213,9 @@ Serial.println(i);
   if (now - lastMsg > 2000) {
     lastMsg = now;
     
+
+
+    char rpmchar[100];
      char tempchar[100];
      char hudchar[100];
        char presschar[100];
@@ -254,7 +269,9 @@ Serial.println(i);
      humidmsg2.toCharArray(hudchar2,100);
      pressmsg2.toCharArray(presschar2,100);
   abshummsg2.toCharArray(abshumchar2,100);
+  rpmstring.toCharArray(rpmchar,100);
  
+
     client.publish("heppatalli/temp/in", tempchar);
     client.publish("heppatalli/humidity/in", hudchar);
     client.publish("heppatalli/pressure/in", presschar);
@@ -265,7 +282,11 @@ Serial.println(i);
     client.publish("heppatalli/pressure/out", presschar2);
      client.publish("heppatalli/abshumid/out", abshumchar2);
  
-  
+  Serial.print("rpm ");
+  rpm=rpms*15;
+  Serial.println(rpm);
+  rpms=0;
+  client.publish("heppatalli/fanrpm", rpmchar);
  
  
   }
@@ -285,6 +306,7 @@ if  (((abshum-abshum2>1.5)&&(fanvalue>=0))&&(temp2>0))
   fanvalue--;
   analogWrite(D3, fanvalue);
 }
+
   if (millis() - lastMsg > 5000)
   {
     lastMsg = millis();
