@@ -132,8 +132,8 @@ delay(100);
 //Wire.setClockStretchLimit(2000);
  Wire.begin(D1, D2);
   Wire.setClock(100000);
- pinMode(D3,OUTPUT);
- analogWrite(D3,fanvalue);
+ pinMode(D5,OUTPUT);
+ analogWrite(D5,fanvalue);
     if (!bme1.begin(0x76, &Wire)) {
         Serial.println("Could not find a valid BME280 sensor, check wiring!");
         while (1);
@@ -197,6 +197,7 @@ Serial.println(i);
   //Serial.println(hum);
   Serial.println(t);
   Serial.println(p); 
+  Serial.print("fanvalue");
   Serial.println(fanvalue);
   linedata linedatatemp;
   linedata linedatahumid;
@@ -270,16 +271,26 @@ Serial.println(i);
      pressmsg2.toCharArray(presschar2,100);
   abshummsg2.toCharArray(abshumchar2,100);
   rpmstring.toCharArray(rpmchar,100);
+ char intemp[6];
+ char inhud[6];
+ char outtemp[6];
+ char outhud[6];
+ char press[10];
  
+dtostrf(temp1, 1, 2, intemp);
+dtostrf(hud1, 1, 2, inhud);
+dtostrf(temp2, 1, 2, outtemp);
+dtostrf(hud2, 1, 2, outhud);
+dtostrf(p2, 1, 2, press);
 
-    client.publish("heppatalli/temp/in", tempchar);
-    client.publish("heppatalli/humidity/in", hudchar);
-    client.publish("heppatalli/pressure/in", presschar);
+    client.publish("heppatalli/temp/in", intemp);
+    client.publish("heppatalli/humidity/in", inhud);
+   // client.publish("heppatalli/pressure/in", presschar);
      client.publish("heppatalli/abshumid/in", abshumchar);
 
-      client.publish("heppatalli/temp/out", tempchar2);
-    client.publish("heppatalli/humidity/out", hudchar2);
-    client.publish("heppatalli/pressure/out", presschar2);
+      client.publish("heppatalli/temp/out", outtemp);
+    client.publish("heppatalli/humidity/out", outhud);
+    client.publish("heppatalli/pressure/out", press);
      client.publish("heppatalli/abshumid/out", abshumchar2);
  
   Serial.print("rpm ");
@@ -296,15 +307,15 @@ Serial.println(i);
  
 Serial.println("fan slower");
 fanvalue++;
-analogWrite(D3, fanvalue);
+analogWrite(D5, fanvalue);
 
 
 }
-if  (((abshum-abshum2>1.5)&&(fanvalue>=0))&&(temp2>0))
+if  (((abshum-abshum2>1.5)&&(fanvalue>0))&&(temp1>4))
 {
  Serial.println("fan faster");
   fanvalue--;
-  analogWrite(D3, fanvalue);
+  analogWrite(D5, fanvalue);
 }
 
   if (millis() - lastMsg > 5000)
