@@ -19,7 +19,7 @@ long measuretime=0;
 IPAddress server(192, 168, 1, 201);
 long lastMsg = 0;
 //char msg[50];
-int fanvalue=0;
+int fanvalue;
 int value = 0;
 float t;
 float h;
@@ -132,6 +132,7 @@ delay(100);
 //Wire.setClockStretchLimit(2000);
  Wire.begin(D1, D2);
   Wire.setClock(100000);
+  fanvalue=250;
  pinMode(D5,OUTPUT);
  analogWrite(D5,fanvalue);
     if (!bme1.begin(0x76, &Wire)) {
@@ -301,7 +302,12 @@ dtostrf(p2, 1, 2, press);
  
  
   }
-  if ((abshum-abshum2<1.5)&&(fanvalue<250)||((temp2<0)&&fanvalue<250))
+if(temp1<4)
+{
+  Serial.println("low temp");
+  analogWrite(D5,250);
+}
+if ((abshum-abshum2<1.5)&&(fanvalue<250))
 {
 
  
@@ -311,7 +317,7 @@ analogWrite(D5, fanvalue);
 
 
 }
-if  (((abshum-abshum2>1.5)&&(fanvalue>0))&&(temp1>4))
+if  ((abshum-abshum2>1.5)&&(fanvalue>0))
 {
  Serial.println("fan faster");
   fanvalue--;
