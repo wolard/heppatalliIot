@@ -302,10 +302,12 @@ dtostrf(p2, 1, 2, press);
  
  
   }
-if(temp1<4)
+if(temp1<3)
 {
+   Serial.print(temp1);
   Serial.println("low temp");
-  analogWrite(D5,250);
+  fanvalue=250;
+  analogWrite(D5,fanvalue);
 }
 if ((abshum-abshum2<1.5)&&(fanvalue<250))
 {
